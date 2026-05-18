@@ -19,4 +19,18 @@ class Estudiante {
   method aprobo(materia) = materiasAprobadas.any(
     { materiaAprobada => materiaAprobada.materia() == materia }
   )
+  
+  method cantidadMateriasAprobadas() = materiasAprobadas.size()
+  
+  method promedio() {
+    if (not self.aproboMaterias()) self.error(
+        "No se puede calcular el promedio de notas sin materias aprobadas"
+      )
+    
+    return materiasAprobadas.average(
+      { materiaAprobada => materiaAprobada.nota() }
+    )
+  }
+
+  method aproboMaterias() = not materiasAprobadas.isEmpty()
 }
