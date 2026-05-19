@@ -1,6 +1,5 @@
 import materiaAprobada.*
 import carrera.*
-import materia.*
 
 class Estudiante {
   const property nombre
@@ -18,6 +17,16 @@ class Estudiante {
     if (self.aprobo(materia)) self.error("La materia ya ha sido aprobada")
     if (nota < 4) self.error("La nota mínima para aprobar es 4")
   }
+  
+  method inscribirACarrera(carrera) {
+    if (self.estaInscriptoEnCarrera(carrera)) self.error(
+        "El estudiante ya se encuentra inscripto en la carrera"
+      )
+    
+    carrerasInscripto.add(carrera)
+  }
+  
+  method estaInscriptoEnCarrera(carrera) = carrerasInscripto.contains(carrera)
   
   method aprobo(materia) = materiasAprobadas.any(
     { materiaAprobada => materiaAprobada.materia() == materia }
