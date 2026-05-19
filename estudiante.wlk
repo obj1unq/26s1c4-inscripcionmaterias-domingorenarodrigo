@@ -1,9 +1,12 @@
 import materiaAprobada.*
+import carrera.*
+import materia.*
 
 class Estudiante {
   const property nombre
   const property apellido
   const property materiasAprobadas = new Set()
+  const property carrerasInscripto = new Set()
   
   method registrarMateriaAprobada(_materia, _nota) {
     self.validarAprobacion(_materia, _nota)
@@ -31,6 +34,10 @@ class Estudiante {
       { materiaAprobada => materiaAprobada.nota() }
     )
   }
-
+  
   method aproboMaterias() = not materiasAprobadas.isEmpty()
+  
+  method materiasDeCarrerasInscripto() = carrerasInscripto.flatMap(
+    { carreraInscripto => carreraInscripto.materias() }
+  )
 }
