@@ -1,0 +1,9 @@
+import materia.*
+
+describe "Comportamiento básico" {
+  test "La Materia describe su nombre" {
+    const objetos1 = new Materia(nombre = "Objetos 1")
+    
+    assert.equals("Objetos 1", objetos1.nombre())
+  }
+}
