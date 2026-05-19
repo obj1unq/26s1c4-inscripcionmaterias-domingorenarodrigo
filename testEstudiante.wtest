@@ -28,37 +28,26 @@ describe "Materias Aprobadas" {
   const notaAprobada = 7
   const notaDesaprobada = 3
   
-  method aprobarObjetos1() {
-    materiasAprobadasEst.add(
-      new MateriaAprobada(materia = objetos1, nota = notaAprobada)
-    )
-  }
-  
   test "El Estudiante describe sus Materias Aprobadas" {
     assert.equals(materiasAprobadasEst, estudiante.materiasAprobadas())
   }
   
-  test "El Estudiante indica si aprobó una Materia" {
-    self.aprobarObjetos1()
-    
-    assert.that(estudiante.aprobo(objetos1))
-    assert.notThat(estudiante.aprobo(objetos2))
+  test "El Estudiante describe la cantidad de Materias que tiene Aprobadas" {
+    assert.equals(0, estudiante.cantidadMateriasAprobadas())
   }
   
-  test "Con la Materia ya aprobada, el Estudiante valida si se puede registrar la aprobación de la Materia y hay error" {
-    self.aprobarObjetos1()
-    
-    assert.throwsExceptionWithMessage(
-      "La materia ya ha sido aprobada",
-      { estudiante.validarAprobacion(objetos1, notaAprobada) }
-    )
+  test "El Estudiante indica si aprobó alguna Materia" {
+    assert.notThat(estudiante.aproboMaterias())
   }
   
-  test "Con una nota de desaprobación, el Estudiante valida si se puede registrar la aprobación de una Materia y hay error" {
-    assert.throwsExceptionWithMessage(
-      "La nota mínima para aprobar es 4",
-      { estudiante.validarAprobacion(objetos1, notaDesaprobada) }
+  test "El Estudiante inicia de forma predeterminada sin Materias Aprobadas" {
+    const nuevoEstudiante = new Estudiante(
+      nombre = "Rodrigo",
+      apellido = "Domingorena"
     )
+    
+    assert.equals(0, nuevoEstudiante.cantidadMateriasAprobadas())
+    assert.notThat(nuevoEstudiante.aproboMaterias())
   }
   
   test "Con la Materia sin aprobar y con una nota de aprobación, El Estudiante registra la Materia como Aprobada" {
@@ -72,7 +61,7 @@ describe "Materias Aprobadas" {
   }
   
   test "Con la Materia ya aprobada, el Estudiante registra la Materia como Aprobada y hay error" {
-    self.aprobarObjetos1()
+    estudiante.registrarMateriaAprobada(objetos1, notaAprobada)
     
     assert.throwsExceptionWithMessage(
       "La materia ya ha sido aprobada",
@@ -84,6 +73,26 @@ describe "Materias Aprobadas" {
     assert.throwsExceptionWithMessage(
       "La nota mínima para aprobar es 4",
       { estudiante.registrarMateriaAprobada(objetos1, notaDesaprobada) }
+    )
+  }
+  
+  test "El Estudiante indica si aprobó una Materia" {
+    estudiante.registrarMateriaAprobada(objetos1, notaAprobada)
+    
+    assert.that(estudiante.aprobo(objetos1))
+  }
+  
+  test "Con alguna Materia ya aprobada, el Estudiante describe el promedio de notas de sus Materias Aprobadas" {
+    estudiante.registrarMateriaAprobada(objetos1, 8)
+    estudiante.registrarMateriaAprobada(objetos2, 10)
+    
+    assert.equals(9, estudiante.promedio())
+  }
+  
+  test "Sin ninguna Materia aprobada, el Estudiante describe su promedio de notas y hay error" {
+    assert.throwsExceptionWithMessage(
+      "No se puede calcular el promedio de notas sin materias aprobadas",
+      { estudiante.promedio() }
     )
   }
 }
