@@ -1,6 +1,7 @@
 import estudiante.*
 import materia.*
 import materiaAprobada.*
+import carrera.*
 
 describe "Comportamiento básico" {
   const nombreEst = "Roque"
@@ -93,6 +94,71 @@ describe "Materias Aprobadas" {
     assert.throwsExceptionWithMessage(
       "No se puede calcular el promedio de notas sin materias aprobadas",
       { estudiante.promedio() }
+    )
+  }
+}
+
+describe "Carreras inscripto" {
+  const carrerasInscriptoEst = new Set()
+  const estudiante = new Estudiante(
+    nombre = "Roque",
+    apellido = "Pérez",
+    carrerasInscripto = carrerasInscriptoEst
+  )
+  const objetos1 = new Materia(nombre = "Objetos 1")
+  const basesDeDatos = new Materia(nombre = "Bases de Datos")
+  const latin = new Materia(nombre = "Latín")
+  const historiaDerecho = new Materia(nombre = "Historia del Derecho Argentino")
+  const programacion = new Carrera(
+    nombre = "Programación",
+    materias = #{objetos1, basesDeDatos}
+  )
+  const derecho = new Carrera(
+    nombre = "Derecho",
+    materias = #{latin, historiaDerecho}
+  )
+  
+  test "El Estudiante describe las Carreras en las que está inscripto" {
+    assert.equals(carrerasInscriptoEst, estudiante.carrerasInscripto())
+  }
+  
+  test "El Estudiante inicia de forma predeterminada sin estar inscripto a ninguna Carrera" {
+    const nuevoEstudiante = new Estudiante(
+      nombre = "Rodrigo",
+      apellido = "Domingorena"
+    )
+    
+    assert.that(nuevoEstudiante.carrerasInscripto().isEmpty())
+  }
+  
+  test "Con la Carrera sin inscribir, el Estudiante se inscribe a la Carrera" {
+    estudiante.inscribirACarrera(programacion)
+    
+    assert.that(estudiante.carrerasInscripto().contains(programacion))
+  }
+  
+  test "Con la Carrera ya inscripta, el Estudiante se inscribe a la Carrera y hay error" {
+    estudiante.inscribirACarrera(programacion)
+    
+    assert.throwsExceptionWithMessage(
+      "El estudiante ya se encuentra inscripto en la carrera",
+      { estudiante.inscribirACarrera(programacion) }
+    )
+  }
+  
+  test "El Estudiante indica si está inscripto en una Carrera" {
+    estudiante.inscribirACarrera(programacion)
+    
+    assert.that(estudiante.estaInscriptoEnCarrera(programacion))
+  }
+  
+  test "El Estudiante describe las Materias de las Carreras en las que está inscripto" {
+    estudiante.inscribirACarrera(programacion)
+    estudiante.inscribirACarrera(derecho)
+    
+    assert.equals(
+      [objetos1, basesDeDatos, latin, historiaDerecho],
+      estudiante.materiasDeCarrerasInscripto()
     )
   }
 }
