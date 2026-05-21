@@ -2,18 +2,15 @@ import materia.*
 import materiaAprobada.*
 
 describe "Comportamiento básico" {
-  const objetos1 = new Materia(nombre = "Objetos 1")
-  const notaMateria = 7
-  const materiaAprobada = new MateriaAprobada(
-    materia = objetos1,
-    nota = notaMateria
-  )
+  const objetos1 = new Materia()
+  const _nota = 7
+  const materiaAprobada = new MateriaAprobada(materia = objetos1, nota = _nota)
   
   test "La Materia Aprobada describe su Materia" {
     assert.equals(objetos1, materiaAprobada.materia())
   }
-
+  
   test "La Materia Aprobada describe su nota" {
-    assert.equals(notaMateria, materiaAprobada.nota())
+    assert.equals(_nota, materiaAprobada.nota())
   }
 }

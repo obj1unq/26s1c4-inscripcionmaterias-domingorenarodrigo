@@ -2,8 +2,6 @@ import materiaAprobada.*
 import carrera.*
 
 class Estudiante {
-  const property nombre
-  const property apellido
   const property materiasAprobadas = new Set()
   const property carrerasInscripto = new Set()
   
@@ -18,18 +16,10 @@ class Estudiante {
     if (nota < 4) self.error("La nota mínima para aprobar es 4")
   }
   
-  method inscribirACarrera(carrera) {
-    if (self.estaInscriptoEnCarrera(carrera)) self.error(
-        "El estudiante ya se encuentra inscripto en la carrera"
-      )
-    
-    carrerasInscripto.add(carrera)
-  }
+  method aprobo(materia) = self.materiasDeMateriasAprobadas().contains(materia)
   
-  method estaInscriptoEnCarrera(carrera) = carrerasInscripto.contains(carrera)
-  
-  method aprobo(materia) = materiasAprobadas.any(
-    { materiaAprobada => materiaAprobada.materia() == materia }
+  method materiasDeMateriasAprobadas() = materiasAprobadas.map(
+    { materiaAprobada => materiaAprobada.materia() }
   )
   
   method cantidadMateriasAprobadas() = materiasAprobadas.size()
@@ -46,6 +36,16 @@ class Estudiante {
   
   method aproboMaterias() = not materiasAprobadas.isEmpty()
   
+  method inscribirACarrera(carrera) {
+    if (self.estaInscriptoEnCarrera(carrera)) self.error(
+        "El estudiante ya se encuentra inscripto en la carrera"
+      )
+    
+    carrerasInscripto.add(carrera)
+  }
+  
+  method estaInscriptoEnCarrera(carrera) = carrerasInscripto.contains(carrera)
+
   method materiasDeCarrerasInscripto() = carrerasInscripto.flatMap(
     { carreraInscripto => carreraInscripto.materias() }
   )

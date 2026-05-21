@@ -1,3 +1,1 @@
-class Materia {
-  const property nombre
-}
+class Materia {}

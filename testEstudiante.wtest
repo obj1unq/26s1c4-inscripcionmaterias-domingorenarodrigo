@@ -3,34 +3,17 @@ import materia.*
 import materiaAprobada.*
 import carrera.*
 
-describe "Comportamiento básico" {
-  const nombreEst = "Roque"
-  const apellidoEst = "Pérez"
-  const estudiante = new Estudiante(nombre = nombreEst, apellido = apellidoEst)
-  
-  test "El Estudiante describe su nombre" {
-    assert.equals(nombreEst, estudiante.nombre())
-  }
-  
-  test "El Estudiante describe su apellido" {
-    assert.equals(apellidoEst, estudiante.apellido())
-  }
-}
-
 describe "Materias Aprobadas" {
-  const materiasAprobadasEst = new Set()
-  const estudiante = new Estudiante(
-    nombre = "Roque",
-    apellido = "Pérez",
-    materiasAprobadas = materiasAprobadasEst
-  )
-  const objetos1 = new Materia(nombre = "Objetos 1")
-  const objetos2 = new Materia(nombre = "Objetos 2")
+  const _materiasAprobadas = new Set()
+  const estudiante = new Estudiante(materiasAprobadas = _materiasAprobadas)
+  const objetos1 = new Materia()
+  const objetos2 = new Materia()
+  const matematica1 = new Materia()
   const notaAprobada = 7
   const notaDesaprobada = 3
   
   test "El Estudiante describe sus Materias Aprobadas" {
-    assert.equals(materiasAprobadasEst, estudiante.materiasAprobadas())
+    assert.equals(_materiasAprobadas, estudiante.materiasAprobadas())
   }
   
   test "El Estudiante describe la cantidad de Materias que tiene Aprobadas" {
@@ -42,10 +25,7 @@ describe "Materias Aprobadas" {
   }
   
   test "El Estudiante inicia de forma predeterminada sin Materias Aprobadas" {
-    const nuevoEstudiante = new Estudiante(
-      nombre = "Rodrigo",
-      apellido = "Domingorena"
-    )
+    const nuevoEstudiante = new Estudiante()
     
     assert.equals(0, nuevoEstudiante.cantidadMateriasAprobadas())
     assert.notThat(nuevoEstudiante.aproboMaterias())
@@ -54,11 +34,7 @@ describe "Materias Aprobadas" {
   test "Con la Materia sin aprobar y con una nota de aprobación, El Estudiante registra la Materia como Aprobada" {
     estudiante.registrarMateriaAprobada(objetos1, notaAprobada)
     
-    assert.that(
-      estudiante.materiasAprobadas().any(
-        { materiaAprobada => materiaAprobada.materia() == objetos1 }
-      )
-    )
+    assert.that(estudiante.materiasDeMateriasAprobadas().contains(objetos1))
   }
   
   test "Con la Materia ya aprobada, el Estudiante registra la Materia como Aprobada y hay error" {
@@ -83,6 +59,19 @@ describe "Materias Aprobadas" {
     assert.that(estudiante.aprobo(objetos1))
   }
   
+  test "El Estudiante describe las Materias de las Materias Aprobadas" {
+    estudiante.registrarMateriaAprobada(objetos1, notaAprobada)
+    estudiante.registrarMateriaAprobada(matematica1, notaAprobada)
+    estudiante.registrarMateriaAprobada(objetos2, notaAprobada)
+    
+    
+    assert.equals(
+      [objetos1, matematica1, objetos2],
+      estudiante.materiasDeMateriasAprobadas()
+    )
+  }
+  
+  // Respuesta a consulta: valor de Estudiante.materiasDeMateriasAprobadas()
   test "Con alguna Materia ya aprobada, el Estudiante describe el promedio de notas de sus Materias Aprobadas" {
     estudiante.registrarMateriaAprobada(objetos1, 8)
     estudiante.registrarMateriaAprobada(objetos2, 10)
@@ -99,34 +88,21 @@ describe "Materias Aprobadas" {
 }
 
 describe "Carreras inscripto" {
-  const carrerasInscriptoEst = new Set()
-  const estudiante = new Estudiante(
-    nombre = "Roque",
-    apellido = "Pérez",
-    carrerasInscripto = carrerasInscriptoEst
-  )
-  const objetos1 = new Materia(nombre = "Objetos 1")
-  const basesDeDatos = new Materia(nombre = "Bases de Datos")
-  const latin = new Materia(nombre = "Latín")
-  const historiaDerecho = new Materia(nombre = "Historia del Derecho Argentino")
-  const programacion = new Carrera(
-    nombre = "Programación",
-    materias = #{objetos1, basesDeDatos}
-  )
-  const derecho = new Carrera(
-    nombre = "Derecho",
-    materias = #{latin, historiaDerecho}
-  )
+  const _carrerasInscripto = new Set()
+  const estudiante = new Estudiante(carrerasInscripto = _carrerasInscripto)
+  const objetos1 = new Materia()
+  const basesDeDatos = new Materia()
+  const latin = new Materia()
+  const historiaDerecho = new Materia()
+  const programacion = new Carrera(materias = #{objetos1, basesDeDatos})
+  const derecho = new Carrera(materias = #{latin, historiaDerecho})
   
   test "El Estudiante describe las Carreras en las que está inscripto" {
-    assert.equals(carrerasInscriptoEst, estudiante.carrerasInscripto())
+    assert.equals(_carrerasInscripto, estudiante.carrerasInscripto())
   }
   
   test "El Estudiante inicia de forma predeterminada sin estar inscripto a ninguna Carrera" {
-    const nuevoEstudiante = new Estudiante(
-      nombre = "Rodrigo",
-      apellido = "Domingorena"
-    )
+    const nuevoEstudiante = new Estudiante()
     
     assert.that(nuevoEstudiante.carrerasInscripto().isEmpty())
   }
@@ -162,3 +138,5 @@ describe "Carreras inscripto" {
     )
   }
 }
+
+"Corrección luego de explicación en clase: Eliminación de atributos de nombres y reemplazo de comparación por igualdad por métodos map/contains"
