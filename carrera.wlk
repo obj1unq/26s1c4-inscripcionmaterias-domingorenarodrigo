@@ -1,13 +1,13 @@
 class Carrera {
-  const property materias = new Set()
+  const property planDeEstudios = new Set()
 
-  method agregar(materia) {
-    if (self.esParteDelPlan(materia)) self.error(
-      "La materia ya es parte del plan de estudios de la carrera"
+  method agregarAlPlan(materia) {
+    if (self.contieneEnElPlan(materia)) self.error(
+      "La materia ya está contenida en el plan de estudios de la carrera"
     )
 
-    materias.add(materia)
+    planDeEstudios.add(materia)
   }
 
-  method esParteDelPlan(materia) = materias.contains(materia)
+  method contieneEnElPlan(materia) = planDeEstudios.contains(materia)
 }

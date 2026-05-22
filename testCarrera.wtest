@@ -1,39 +1,39 @@
 import carrera.*
 import materia.*
 
-describe "Materias" {
-  const _materias = new Set()
-  const carrera = new Carrera(materias = _materias)
+describe "Materias del plan de estudios" {
+  const _planDeEstudios = new Set()
+  const carrera = new Carrera(planDeEstudios = _planDeEstudios)
   const objetos1 = new Materia()
   
-  test "La Carrera describe sus Materias" {
-    assert.equals(_materias, carrera.materias())
+  test "La Carrera describe las Materias de su plan de estudios" {
+    assert.equals(_planDeEstudios, carrera.planDeEstudios())
   }
   
   test "La Carrera inicia de forma predeterminada sin Materias en su plan de estudios" {
     const nuevaCarrera = new Carrera()
     
-    assert.that(nuevaCarrera.materias().isEmpty())
+    assert.that(nuevaCarrera.planDeEstudios().isEmpty())
   }
   
   test "Sin la Materia en su plan de estudios, la Carrera agrega la Materia a él" {
-    carrera.agregar(objetos1)
+    carrera.agregarAlPlan(objetos1)
     
-    assert.that(carrera.materias().contains(objetos1))
+    assert.that(carrera.planDeEstudios().contains(objetos1))
   }
   
   test "Con la Materia en su plan de estudios, la Carrera agrega la Materia a él y hay error" {
-    carrera.agregar(objetos1)
+    carrera.agregarAlPlan(objetos1)
     
     assert.throwsExceptionWithMessage(
-      "La materia ya es parte del plan de estudios de la carrera",
-      { carrera.agregar(objetos1) }
+      "La materia ya está contenida en el plan de estudios de la carrera",
+      { carrera.agregarAlPlan(objetos1) }
     )
   }
   
-  test "La Carrera indica si una Materia pertenece a su plan de estudios" {
-    carrera.agregar(objetos1)
+  test "La Carrera indica si una Materia está contenida en su plan de estudios" {
+    carrera.agregarAlPlan(objetos1)
     
-    assert.that(carrera.esParteDelPlan(objetos1))
+    assert.that(carrera.contieneEnElPlan(objetos1))
   }
 }
