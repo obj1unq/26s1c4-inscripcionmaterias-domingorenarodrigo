@@ -59,7 +59,15 @@ describe "Materias Aprobadas" {
     assert.that(estudiante.aprobo(objetos1))
   }
   
-  test "El Estudiante describe las Materias de las Materias Aprobadas" {
+  test "El Estudiante indica si aprobó la totalidad de una colección de Materias" {
+    estudiante.registrarMateriaAprobada(objetos1, notaAprobada)
+    estudiante.registrarMateriaAprobada(matematica1, notaAprobada)
+    estudiante.registrarMateriaAprobada(objetos2, notaAprobada)
+    
+    assert.that(estudiante.aproboTodas([objetos1, matematica1, objetos2]))
+  }
+  
+  test "El Estudiante describe las Materias de sus Materias Aprobadas" {
     estudiante.registrarMateriaAprobada(objetos1, notaAprobada)
     estudiante.registrarMateriaAprobada(matematica1, notaAprobada)
     estudiante.registrarMateriaAprobada(objetos2, notaAprobada)
@@ -71,7 +79,6 @@ describe "Materias Aprobadas" {
     )
   }
   
-  // Respuesta a consulta: valor de Estudiante.materiasDeMateriasAprobadas()
   test "Con alguna Materia ya aprobada, el Estudiante describe el promedio de notas de sus Materias Aprobadas" {
     estudiante.registrarMateriaAprobada(objetos1, 8)
     estudiante.registrarMateriaAprobada(objetos2, 10)
@@ -94,49 +101,85 @@ describe "Carreras inscripto" {
   const basesDeDatos = new Materia()
   const latin = new Materia()
   const historiaDerecho = new Materia()
-  const programacion = new Carrera(materias = #{objetos1, basesDeDatos})
-  const derecho = new Carrera(materias = #{latin, historiaDerecho})
+  const programacion = new Carrera(planDeEstudios = #{objetos1, basesDeDatos})
+  const derecho = new Carrera(planDeEstudios = #{latin, historiaDerecho})
   
   test "El Estudiante describe las Carreras en las que está inscripto" {
     assert.equals(_carrerasInscripto, estudiante.carrerasInscripto())
   }
   
-  test "El Estudiante inicia de forma predeterminada sin estar inscripto a ninguna Carrera" {
+  test "El Estudiante inicia de forma predeterminada sin estar inscripto en ninguna Carrera" {
     const nuevoEstudiante = new Estudiante()
     
     assert.that(nuevoEstudiante.carrerasInscripto().isEmpty())
   }
   
-  test "Con la Carrera sin inscribir, el Estudiante se inscribe a la Carrera" {
-    estudiante.inscribirACarrera(programacion)
+  test "Con la Carrera sin inscribir, el Estudiante se inscribe en la Carrera" {
+    estudiante.inscribirEnCarrera(programacion)
     
     assert.that(estudiante.carrerasInscripto().contains(programacion))
   }
   
-  test "Con la Carrera ya inscripta, el Estudiante se inscribe a la Carrera y hay error" {
-    estudiante.inscribirACarrera(programacion)
+  test "Con la Carrera ya inscripta, el Estudiante se inscribe en la Carrera y hay error" {
+    estudiante.inscribirEnCarrera(programacion)
     
     assert.throwsExceptionWithMessage(
       "El estudiante ya se encuentra inscripto en la carrera",
-      { estudiante.inscribirACarrera(programacion) }
+      { estudiante.inscribirEnCarrera(programacion) }
     )
   }
   
   test "El Estudiante indica si está inscripto en una Carrera" {
-    estudiante.inscribirACarrera(programacion)
+    estudiante.inscribirEnCarrera(programacion)
     
     assert.that(estudiante.estaInscriptoEnCarrera(programacion))
   }
   
-  test "El Estudiante describe las Materias de las Carreras en las que está inscripto" {
-    estudiante.inscribirACarrera(programacion)
-    estudiante.inscribirACarrera(derecho)
+  test "El Estudiante describe las Materias de los planes de estudios de las Carreras en las que está inscripto" {
+    estudiante.inscribirEnCarrera(programacion)
+    estudiante.inscribirEnCarrera(derecho)
     
     assert.equals(
       [objetos1, basesDeDatos, latin, historiaDerecho],
-      estudiante.materiasDeCarrerasInscripto()
+      estudiante.planesDeCarrerasInscripto()
     )
   }
 }
 
-"Corrección luego de explicación en clase: Eliminación de atributos de nombres y reemplazo de comparación por igualdad por métodos map/contains"
+describe "Materias inscripto" {
+  const _materiasInscripto = new Set()
+  const estudiante = new Estudiante(materiasInscripto = _materiasInscripto)
+  const objetos1 = new Materia()
+  const basesDeDatos = new Materia()
+  const estrategiasDePersistencia = new Materia()
+  const latin = new Materia()
+  const programacion = new Carrera(
+    planDeEstudios = #{objetos1, basesDeDatos, estrategiasDePersistencia}
+  )
+  const notaAprobada = 7
+  
+  test "El Estudiante describe las Materias en las que está inscripto" {
+    assert.equals(_materiasInscripto, estudiante.materiasInscripto())
+  }
+  
+  test "El Estudiante inicia de forma predeterminada sin estar inscripto en ninguna Materia" {
+    const nuevoEstudiante = new Estudiante()
+    
+    assert.that(nuevoEstudiante.materiasInscripto().isEmpty())
+  }
+  
+  test "El Estudiante indica si está inscripto en una Materia" {
+    assert.notThat(estudiante.estaInscriptoEnMateria(objetos1))
+  }
+  
+  test "El Estudiante indica si puede inscribirse en una Materia" {
+    estudiante.inscribirEnCarrera(programacion)
+    estudiante.registrarMateriaAprobada(basesDeDatos, notaAprobada)
+    basesDeDatos.agregarARequisitos(estrategiasDePersistencia)
+    
+    assert.that(estudiante.puedeInscribirseEnMateria(objetos1))
+    assert.notThat(estudiante.puedeInscribirseEnMateria(latin))
+    assert.notThat(estudiante.puedeInscribirseEnMateria(basesDeDatos))
+    assert.that(estudiante.puedeInscribirseEnMateria(estrategiasDePersistencia))
+  }
+}

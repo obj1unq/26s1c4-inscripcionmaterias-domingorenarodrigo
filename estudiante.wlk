@@ -4,25 +4,22 @@ import carrera.*
 class Estudiante {
   const property materiasAprobadas = new Set()
   const property carrerasInscripto = new Set()
+  const property materiasInscripto = new Set()
   
-  method registrarMateriaAprobada(_materia, _nota) {
-    self.validarAprobacion(_materia, _nota)
-    
-    materiasAprobadas.add(new MateriaAprobada(materia = _materia, nota = _nota))
-  }
+  // Materias Aprobadas
+  method aproboMaterias() = not materiasAprobadas.isEmpty()
   
-  method validarAprobacion(materia, nota) {
-    if (self.aprobo(materia)) self.error("La materia ya ha sido aprobada")
-    if (nota < 4) self.error("La nota mínima para aprobar es 4")
-  }
-  
-  method aprobo(materia) = self.materiasDeMateriasAprobadas().contains(materia)
+  method cantidadMateriasAprobadas() = materiasAprobadas.size()
   
   method materiasDeMateriasAprobadas() = materiasAprobadas.map(
     { materiaAprobada => materiaAprobada.materia() }
   )
   
-  method cantidadMateriasAprobadas() = materiasAprobadas.size()
+  method aprobo(materia) = self.materiasDeMateriasAprobadas().contains(materia)
+  
+  method aproboTodas(materias) = materias.all(
+    { materia => self.aprobo(materia) }
+  )
   
   method promedio() {
     if (not self.aproboMaterias()) self.error(
@@ -34,9 +31,21 @@ class Estudiante {
     )
   }
   
-  method aproboMaterias() = not materiasAprobadas.isEmpty()
+  method validarAprobacion(materia, nota) {
+    if (self.aprobo(materia)) self.error("La materia ya ha sido aprobada")
+    if (nota < 4) self.error("La nota mínima para aprobar es 4")
+  }
   
-  method inscribirACarrera(carrera) {
+  method registrarMateriaAprobada(_materia, _nota) {
+    self.validarAprobacion(_materia, _nota)
+    
+    materiasAprobadas.add(new MateriaAprobada(materia = _materia, nota = _nota))
+  }
+  
+  // Carreras inscripto
+  method estaInscriptoEnCarrera(carrera) = carrerasInscripto.contains(carrera)
+  
+  method inscribirEnCarrera(carrera) {
     if (self.estaInscriptoEnCarrera(carrera)) self.error(
         "El estudiante ya se encuentra inscripto en la carrera"
       )
@@ -44,9 +53,22 @@ class Estudiante {
     carrerasInscripto.add(carrera)
   }
   
-  method estaInscriptoEnCarrera(carrera) = carrerasInscripto.contains(carrera)
-
-  method materiasDeCarrerasInscripto() = carrerasInscripto.flatMap(
-    { carreraInscripto => carreraInscripto.materias() }
+  method planesDeCarrerasInscripto() = carrerasInscripto.flatMap(
+    { carreraInscripto => carreraInscripto.planDeEstudios() }
   )
+  
+  // Materias inscripto
+  method estaInscriptoEnMateria(materia) = materiasInscripto.contains(materia)
+  
+  method puedeInscribirseEnMateria(materia) {
+    return
+      self.planesDeCarrerasInscripto().contains(materia)
+        &&
+      not self.aprobo(materia)
+        &&
+      not self.estaInscriptoEnMateria(materia)
+        &&
+      self.aproboTodas(materia.requisitos())
+  }
 }
+

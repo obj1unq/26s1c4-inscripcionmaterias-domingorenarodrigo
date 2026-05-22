@@ -1,1 +1,45 @@
 import materia.*
+
+describe "Materias como requisitos" {
+  const _requisitos = new Set()
+  const materia = new Materia(requisitos = _requisitos)
+  const objetos1 = new Materia()
+  
+  test "La Materia describe sus Materias como requisitos para ser cursada" {
+    assert.equals(_requisitos, materia.requisitos())
+  }
+  
+  test "La Materia inicia de forma predeterminada sin Materias como requisitos para ser cursada" {
+    const nuevaMateria = new Materia()
+    
+    assert.that(nuevaMateria.requisitos().isEmpty())
+  }
+  
+  test "Con una Materia distinta de ella y fuera de sus requisitos, la Materia la agrega a ellos" {
+    materia.agregarARequisitos(objetos1)
+    
+    assert.that(materia.requisitos().contains(objetos1))
+  }
+  
+  test "La Materia se agrega a sí misma como requisito para ser cursada y hay error" {
+    assert.throwsExceptionWithMessage(
+      "Una materia no puede tenerse a sí misma como requisito para ser cursada",
+      { materia.agregarARequisitos(materia) }
+    )
+  }
+  
+  test "Con una Materia entre sus requisitos, la Materia la agrega a ellos y hay error" {
+    materia.agregarARequisitos(objetos1)
+    
+    assert.throwsExceptionWithMessage(
+      "La materia ya está entre los requisitos para ser cursada",
+      { materia.agregarARequisitos(objetos1) }
+    )
+  }
+  
+  test "La Materia indica si una Materia está entre sus requisitos para ser cursada" {
+    materia.agregarARequisitos(objetos1)
+    
+    assert.that(materia.tieneComoRequisito(objetos1))
+  }
+}
