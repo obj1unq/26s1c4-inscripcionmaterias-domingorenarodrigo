@@ -1,10 +1,8 @@
 import materiaAprobada.*
-import carrera.*
 
 class Estudiante {
   const property materiasAprobadas = new Set()
   const property carrerasInscripto = new Set()
-  const property materiasInscripto = new Set()
   
   // Materias Aprobadas
   method aproboMaterias() = not materiasAprobadas.isEmpty()
@@ -58,17 +56,15 @@ class Estudiante {
   )
   
   // Materias inscripto
-  method estaInscriptoEnMateria(materia) = materiasInscripto.contains(materia)
+  method materiasInscripto() = self.planesDeCarrerasInscripto().filter(
+    { materiaDelPlan => materiaDelPlan.tieneInscripto(self) }
+  )
   
-  method puedeInscribirseEnMateria(materia) {
-    return
-      self.planesDeCarrerasInscripto().contains(materia)
-        &&
-      not self.aprobo(materia)
-        &&
-      not self.estaInscriptoEnMateria(materia)
-        &&
-      self.aproboTodas(materia.requisitos())
+  method estaInscriptoEnMateria(materia) = materia.tieneInscripto(self)
+  
+  method puedeInscribirseEnMateria(materia) = materia.puedeInscribir(self)
+  
+  method inscribirEnMateria(materia) {
+    materia.inscribir(self)
   }
 }
-

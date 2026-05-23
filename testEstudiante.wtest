@@ -147,8 +147,7 @@ describe "Carreras inscripto" {
 }
 
 describe "Materias inscripto" {
-  const _materiasInscripto = new Set()
-  const estudiante = new Estudiante(materiasInscripto = _materiasInscripto)
+  const estudiante = new Estudiante()
   const objetos1 = new Materia()
   const basesDeDatos = new Materia()
   const estrategiasDePersistencia = new Materia()
@@ -158,28 +157,106 @@ describe "Materias inscripto" {
   )
   const notaAprobada = 7
   
-  test "El Estudiante describe las Materias en las que está inscripto" {
-    assert.equals(_materiasInscripto, estudiante.materiasInscripto())
+  method configurarEstadoDeCumplimiento() {
+    estudiante.inscribirEnCarrera(programacion)
+    estrategiasDePersistencia.agregarARequisitos(basesDeDatos)
+    estudiante.registrarMateriaAprobada(basesDeDatos, notaAprobada)
+  }
+  
+  method configurarEstadoDeIncumplimiento() {
+    estudiante.inscribirEnCarrera(programacion)
+    estrategiasDePersistencia.agregarARequisitos(basesDeDatos)
+    estudiante.registrarMateriaAprobada(objetos1, notaAprobada)
+    estudiante.inscribirEnMateria(basesDeDatos)
   }
   
   test "El Estudiante inicia de forma predeterminada sin estar inscripto en ninguna Materia" {
-    const nuevoEstudiante = new Estudiante()
+    assert.that(estudiante.materiasInscripto().isEmpty())
+  }
+  
+  test "Con una Materia con cupo disponible y cumpliendo con las condiciones de inscripción, el Estudiante se inscribe en la Materia" {
+    // Configuración
+    self.configurarEstadoDeCumplimiento()
     
-    assert.that(nuevoEstudiante.materiasInscripto().isEmpty())
+    // Ejercitación
+    // Condición: un Estudiante que está inscripto en la Carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que posee cupo y no tiene requisitos para ser cursada.
+    estudiante.inscribirEnMateria(objetos1)
+    
+    // Condición: un Estudiante que está inscripto en la Carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que posee cupo y tiene requisitos para ser cursada que fueron aprobados por él.
+    estudiante.inscribirEnMateria(estrategiasDePersistencia)
+    
+    // Verificación
+    assert.that(estudiante.estaInscriptoEnMateria(objetos1))
+    assert.that(estudiante.estaInscriptoEnMateria(estrategiasDePersistencia))
+  }
+  
+  test "Sin cumplir con las condiciones de inscripción, el Estudiante se inscribe en una Materia y hay error" {
+    // Configuración
+    self.configurarEstadoDeIncumplimiento()
+    
+    // Ejercitación y Verificación
+    // Condición: un Estudiante que no está inscripto en la Carrera a la que pertenece la Materia.
+    assert.throwsExceptionWithMessage(
+      "No se puede inscribir al estudiante en la materia. Por favor, revisar que cumpla con las condiciones de inscripción.",
+      { estudiante.inscribirEnMateria(latin) }
+    )
+    
+    // Condición: un Estudiante que aprobó la Materia.
+    assert.throwsExceptionWithMessage(
+      "No se puede inscribir al estudiante en la materia. Por favor, revisar que cumpla con las condiciones de inscripción.",
+      { estudiante.inscribirEnMateria(objetos1) }
+    )
+    
+    // Condición: un Estudiante que se encuentra inscripto en la Materia
+    assert.throwsExceptionWithMessage(
+      "No se puede inscribir al estudiante en la materia. Por favor, revisar que cumpla con las condiciones de inscripción.",
+      { estudiante.inscribirEnMateria(basesDeDatos) }
+    )
+    
+    // Condición: un Estudiante que no aprobó los requisitos que tiene la Materia para ser cursada.
+    assert.throwsExceptionWithMessage(
+      "No se puede inscribir al estudiante en la materia. Por favor, revisar que cumpla con las condiciones de inscripción.",
+      { estudiante.inscribirEnMateria(estrategiasDePersistencia) }
+    )
   }
   
   test "El Estudiante indica si está inscripto en una Materia" {
-    assert.notThat(estudiante.estaInscriptoEnMateria(objetos1))
+    estudiante.inscribirEnCarrera(programacion)
+    estudiante.inscribirEnMateria(objetos1)
+    
+    assert.that(estudiante.estaInscriptoEnMateria(objetos1))
+    assert.notThat(estudiante.estaInscriptoEnMateria(basesDeDatos))
   }
   
-  test "El Estudiante indica si puede inscribirse en una Materia" {
-    estudiante.inscribirEnCarrera(programacion)
-    estudiante.registrarMateriaAprobada(basesDeDatos, notaAprobada)
-    basesDeDatos.agregarARequisitos(estrategiasDePersistencia)
+  test "Cumpliendo con las condiciones de inscripción, el Estudiante indica que puede inscribirse en una Materia" {
+    // Configuración
+    self.configurarEstadoDeCumplimiento()
     
+    // Ejercitación y Verificación
+    // Condición: un Estudiante que está inscripto en la Carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que no tiene requisitos para ser cursada.
     assert.that(estudiante.puedeInscribirseEnMateria(objetos1))
-    assert.notThat(estudiante.puedeInscribirseEnMateria(latin))
-    assert.notThat(estudiante.puedeInscribirseEnMateria(basesDeDatos))
+    
+    // Condición: un Estudiante que está inscripto en la Carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que tiene requisitos para ser cursada que fueron aprobados por él.
     assert.that(estudiante.puedeInscribirseEnMateria(estrategiasDePersistencia))
+  }
+  
+  test "Sin cumplir con las condiciones de inscripción, el Estudiante indica que no puede inscribirse en una Materia" {
+    // Configuración
+    self.configurarEstadoDeIncumplimiento()
+    
+    // Ejercitación y Verificación
+    // Condición: un Estudiante que no está inscripto en la Carrera a la que pertenece la Materia.
+    assert.notThat(estudiante.puedeInscribirseEnMateria(latin))
+    
+    // Condición: un Estudiante que aprobó la Materia.
+    assert.notThat(estudiante.puedeInscribirseEnMateria(objetos1))
+    
+    // Condición: un Estudiante que se encuentra inscripto en la Materia
+    assert.notThat(estudiante.puedeInscribirseEnMateria(basesDeDatos))
+    
+    // Condición: un Estudiante que no aprobó los requisitos que tiene la Materia para ser cursada.
+    assert.notThat(
+      estudiante.puedeInscribirseEnMateria(estrategiasDePersistencia)
+    )
   }
 }
