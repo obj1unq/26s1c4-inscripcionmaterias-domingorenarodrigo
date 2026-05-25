@@ -60,11 +60,21 @@ class Estudiante {
     { materiaDelPlan => materiaDelPlan.tieneInscripto(self) }
   )
   
+  method materiasEnEspera() = self.planesDeCarrerasInscripto().filter(
+    { materiaDelPlan => materiaDelPlan.tieneEnListaDeEspera(self) }
+  )
+  
   method estaInscriptoEnMateria(materia) = materia.tieneInscripto(self)
+  
+  method estaEnListaDeEspera(materia) = materia.tieneEnListaDeEspera(self)
   
   method puedeInscribirseEnMateria(materia) = materia.puedeInscribir(self)
   
   method inscribirEnMateria(materia) {
     materia.inscribir(self)
+  }
+  
+  method cancelarMateria(materia) {
+    materia.cancelar(self)
   }
 }

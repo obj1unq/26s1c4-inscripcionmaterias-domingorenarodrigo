@@ -59,9 +59,15 @@ describe "Estudiantes inscriptos" {
   const objetos1 = new Materia()
   const basesDeDatos = new Materia()
   const estrategiasDePersistencia = new Materia()
+  const matematica1 = new Materia()
   const latin = new Materia()
   const programacion = new Carrera(
-    planDeEstudios = #{objetos1, basesDeDatos, estrategiasDePersistencia}
+    planDeEstudios = #{
+      objetos1,
+      basesDeDatos,
+      estrategiasDePersistencia,
+      matematica1
+    }
   )
   
   method configurarEstadoDeCumplimiento() {
@@ -75,13 +81,13 @@ describe "Estudiantes inscriptos" {
     estrategiasDePersistencia.agregarARequisitos(basesDeDatos)
     estudiante.registrarMateriaAprobada(objetos1, notaAprobada)
     basesDeDatos.inscribir(estudiante)
+    self.llenarCupo(matematica1)
+    matematica1.inscribir(estudiante)
   }
   
-  method llenarCupoDeMaterias() {
-    objetos1.estudiantesInscriptos().add(new Estudiante())
-    estrategiasDePersistencia.estudiantesInscriptos().add(new Estudiante())
-    objetos1.cupo(1)
-    estrategiasDePersistencia.cupo(1)
+  method llenarCupo(_materia) {
+    _materia.estudiantesInscriptos().add(new Estudiante())
+    _materia.cupo(1)
   }
   
   test "La Materia indica si tiene cupo" {
@@ -128,25 +134,45 @@ describe "Estudiantes inscriptos" {
     assert.equals(0, nuevaMateria.cantidadInscriptos())
   }
   
-  test "La Materia describe los Estudiantes que tiene en lista de espera" {
+  test "La Materia describe los Estudiantes que tiene en la lista de espera" {
     assert.equals(_listaDeEspera, materia.listaDeEspera())
   }
   
-  test "La Materia inicia de forma predeterminada sin tener Estudiantes en lista de espera" {
+  test "La Materia indica si tiene Estudiantes en la lista de espera" {
+    assert.notThat(materia.tieneEspera())
+  }
+  
+  test "La Materia inicia de forma predeterminada sin tener Estudiantes en la lista de espera" {
     const nuevaMateria = new Materia()
     
     assert.that(nuevaMateria.listaDeEspera().isEmpty())
+    assert.notThat(nuevaMateria.tieneEspera())
   }
   
+  test "Con algún Estudiante en la lista de espera, la Materia describe al próximo Estudiante en la lista de espera" {
+    estudiante.inscribirEnCarrera(programacion)
+    self.llenarCupo(objetos1)
+    objetos1.inscribir(estudiante)
+    
+    assert.equals(estudiante, objetos1.proximoEstudianteEnEspera())
+  }
+  
+  test "Sin ningún Estudiante en la lista de espera, la Materia describe al próximo Estudiante en la lista de espera y hay error" {
+    assert.throwsExceptionWithMessage(
+      "No hay próximo estudiante en la lista de espera",
+      { objetos1.proximoEstudianteEnEspera() }
+    )
+  }
+
   test "Con un Estudiante que cumple las condiciones de inscripción y con cupo disponible, la Materia lo inscribe a ella" {
     // Configuración
     self.configurarEstadoDeCumplimiento()
     
     // Ejercitación
-    // Condición: Un Estudiante que está inscripto a la carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que posee cupo y no tiene requisitos para ser cursada.
+    // Condición: Un Estudiante que está inscripto a la carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto ni en lista de espera en ella y la que posee cupo y no tiene requisitos para ser cursada.
     objetos1.inscribir(estudiante)
     
-    // Condición: Un Estudiante que está inscripto a la carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que posee cupo y tiene requisitos para ser cursada que fueron aprobados por él.
+    // Condición: Un Estudiante que está inscripto a la carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto ni en lista de espera en ella y la que posee cupo y tiene requisitos para ser cursada que fueron aprobados por él.
     estrategiasDePersistencia.inscribir(estudiante)
     
     // Verificación
@@ -154,21 +180,22 @@ describe "Estudiantes inscriptos" {
     assert.that(estrategiasDePersistencia.tieneInscripto(estudiante))
   }
   
-  test "Con un Estudiante que cumple las condiciones de inscripción y sin cupo disponible, la Materia lo agrega a su lista de espera" {
+  test "Con un Estudiante que cumple las condiciones de inscripción y sin cupo disponible, la Materia lo inscribe a ella agregándolo a su lista de espera" {
     // Configuración
     self.configurarEstadoDeCumplimiento()
-    self.llenarCupoDeMaterias()
+    self.llenarCupo(objetos1)
+    self.llenarCupo(estrategiasDePersistencia)
     
     // Ejercitación
-    // Condición: Un Estudiante que está inscripto a la carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que no posee cupo y no tiene requisitos para ser cursada.
+    // Condición: Un Estudiante que está inscripto a la carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto ni en lista de espera en ella y la que no posee cupo y no tiene requisitos para ser cursada.
     objetos1.inscribir(estudiante)
     
-    // Condición: Un Estudiante que está inscripto a la carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que no posee cupo y tiene requisitos para ser cursada que fueron aprobados por él.
+    // Condición: Un Estudiante que está inscripto a la carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto ni en lista de espera en ella y la que no posee cupo y tiene requisitos para ser cursada que fueron aprobados por él.
     estrategiasDePersistencia.inscribir(estudiante)
     
     // Verificación
-    assert.that(objetos1.listaDeEspera().contains(estudiante))
-    assert.that(estrategiasDePersistencia.listaDeEspera().contains(estudiante))
+    assert.that(objetos1.tieneEnListaDeEspera(estudiante))
+    assert.that(estrategiasDePersistencia.tieneEnListaDeEspera(estudiante))
   }
   
   test "Con un Estudiante que no cumple las condiciones de inscripción, la Materia lo inscribe a ella y hay error" {
@@ -194,10 +221,68 @@ describe "Estudiantes inscriptos" {
       { basesDeDatos.inscribir(estudiante) }
     )
     
+    // Condición: un Estudiante que se encuentra en la lista de espera de la Materia
+    assert.throwsExceptionWithMessage(
+      "No se puede inscribir al estudiante en la materia. Por favor, revisar que cumpla con las condiciones de inscripción.",
+      { matematica1.inscribir(estudiante) }
+    )
+    
     // Condición: un Estudiante que no aprobó los requisitos que tiene la Materia para ser cursada.
     assert.throwsExceptionWithMessage(
       "No se puede inscribir al estudiante en la materia. Por favor, revisar que cumpla con las condiciones de inscripción.",
       { estrategiasDePersistencia.inscribir(estudiante) }
+    )
+  }
+  
+  test "Con un Estudiante inscripto en ella, la Materia cancela su inscripción" {
+    estudiante.inscribirEnCarrera(programacion)
+    objetos1.inscribir(estudiante)
+    
+    // assert.that(objetos1.tieneInscripto(estudiante))
+    objetos1.cancelar(estudiante)
+    
+    assert.notThat(objetos1.tieneInscripto(estudiante))
+  }
+  
+  test "Con la cancelación de la inscripción de un Estudiante y con algún otro en la lista de espera, la Materia inscribe al próximo Estudiante en ella desde la lista de espera" {
+    // Configuración
+    const estudianteInscripto = new Estudiante()
+    estudianteInscripto.inscribirEnCarrera(programacion)
+    objetos1.inscribir(estudianteInscripto)
+    
+    objetos1.cupo(1)
+    
+    const estudianteEnEspera = new Estudiante()
+    estudianteEnEspera.inscribirEnCarrera(programacion)
+    objetos1.inscribir(estudianteEnEspera)
+    
+    // assert.that(objetos1.tieneInscripto(estudianteInscripto))
+    // assert.that(objetos1.tieneEnListaDeEspera(estudianteEnEspera))
+    // Ejercitación    
+    objetos1.cancelar(estudianteInscripto)
+    
+    // Verificación
+    // assert.notThat(objetos1.tieneInscripto(estudianteInscripto))
+    assert.that(objetos1.tieneInscripto(estudianteEnEspera))
+    assert.notThat(objetos1.tieneEnListaDeEspera(estudianteEnEspera))
+  }
+  
+  test "Con un Estudiante en la lista de espera, la Materia cancela su espera en ella" {
+    estudiante.inscribirEnCarrera(programacion)
+    self.llenarCupo(objetos1)
+    objetos1.inscribir(estudiante)
+    
+    assert.that(objetos1.tieneEnListaDeEspera(estudiante))
+    
+    objetos1.cancelar(estudiante)
+    
+    assert.notThat(objetos1.tieneEnListaDeEspera(estudiante))
+  }
+  
+  test "Con un Estudiante que no está ni inscripto ni en su lista de espera, la Materia lo cancela y hay error" {
+    assert.throwsExceptionWithMessage(
+      "No se puede dar de baja al estudiante de la materia porque no se encuentra ni inscripto ni en la lista de espera.",
+      { objetos1.cancelar(estudiante) }
     )
   }
   
@@ -209,15 +294,23 @@ describe "Estudiantes inscriptos" {
     assert.notThat(basesDeDatos.tieneInscripto(estudiante))
   }
   
+  test "La Materia indica si tiene a un Estudiante en la lista de espera" {
+    estudiante.inscribirEnCarrera(programacion)
+    self.llenarCupo(objetos1)
+    objetos1.inscribir(estudiante)
+    
+    assert.that(objetos1.tieneEnListaDeEspera(estudiante))
+  }
+  
   test "Con un Estudiante que cumple las condiciones de inscripción, la Materia indica que puede inscribirlo" {
     // Configuración
     self.configurarEstadoDeCumplimiento()
     
     // Ejercitación y Verificación
-    // Condición: un Estudiante que está inscripto en la Carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que no tiene requisitos para ser cursada.
+    // Condición: un Estudiante que está inscripto en la Carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto ni en lista de espera en ella y la que no tiene requisitos para ser cursada.
     assert.that(objetos1.puedeInscribir(estudiante))
     
-    // Condición: un Estudiante que está inscripto en la Carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto en ella y la que tiene requisitos para ser cursada que fueron aprobados por él.
+    // Condición: un Estudiante que está inscripto en la Carrera a la que pertenece la Materia, la cual no aprobó ni se encuentra inscripto ni en lista de espera en ella y la que tiene requisitos para ser cursada que fueron aprobados por él.
     assert.that(estrategiasDePersistencia.puedeInscribir(estudiante))
   }
   
@@ -235,7 +328,31 @@ describe "Estudiantes inscriptos" {
     // Condición: un Estudiante que se encuentra inscripto en la Materia
     assert.notThat(basesDeDatos.puedeInscribir(estudiante))
     
+    // Condición: un Estudiante que se encuentra en la lista de espera de la Materia
+    assert.notThat(matematica1.puedeInscribir(estudiante))
+    
     // Condición: un Estudiante que no aprobó los requisitos que tiene la Materia para ser cursada.
     assert.notThat(estrategiasDePersistencia.puedeInscribir(estudiante))
+  }
+  
+  test "Con un Estudiante que cumple las condiciones de cancelación, la Materia indica que puede cancelarlo" {
+    // Configuración
+    self.llenarCupo(basesDeDatos)
+    estudiante.inscribirEnCarrera(programacion)
+    objetos1.inscribir(estudiante)
+    basesDeDatos.inscribir(estudiante)
+    
+    
+    // Ejercitación y Verificación
+    // Condición: un Estudiante que está inscripto en la Materia.
+    assert.that(objetos1.puedeCancelar(estudiante))
+    
+    // Condición: un Estudiante que está en la lista de espera de la Materia.
+    assert.that(basesDeDatos.puedeCancelar(estudiante))
+  }
+  
+  test "Con un Estudiante que no cumple las condiciones de cancelación, la Materia indica que no puede cancelarlo" {
+    // Condición: un Estudiante que no está ni inscripto ni en la lista de espera de la Materia.
+    assert.notThat(objetos1.puedeCancelar(estudiante))
   }
 }
