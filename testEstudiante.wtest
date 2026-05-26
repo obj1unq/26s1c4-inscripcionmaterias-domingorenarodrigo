@@ -342,4 +342,33 @@ describe "Materias inscripto" {
       estudiante.puedeInscribirseEnMateria(estrategiasDePersistencia)
     )
   }
+  
+  test "Dada una colección de Materias, el Estudiante describe las Materias en las que puede inscribirse" {
+    const materias = #{objetos1, basesDeDatos, latin}
+    estudiante.inscribirEnCarrera(programacion)
+    estudiante.registrarMateriaAprobada(basesDeDatos, notaAprobada)
+    
+    assert.equals(
+      #{objetos1},
+      estudiante.materiasEnQuePuedeInscribirse(materias)
+    )
+  }
+  
+  test "Con la Carrera inscripta, el Estudiante describe las Materias de su plan de estudios en las que puede inscribirse" {
+    self.configurarEstadoDeCumplimiento()
+    self.llenarCupo(matematica1)
+    estudiante.inscribirEnMateria(matematica1)
+    
+    assert.equals(
+      #{objetos1, estrategiasDePersistencia},
+      estudiante.materiasDelPlanEnQuePuedeInscribirse(programacion)
+    )
+  }
+  
+  test "Con la Carrera sin inscribir, el Estudiante describe las Materias de su plan de estudios en las que puede inscribirse y hay error" {
+    assert.throwsExceptionWithMessage(
+      "Como mínimo, para poder inscribirse en alguna materia de la carrera, el estudiante debe estar inscripto en ella.",
+      { estudiante.materiasDelPlanEnQuePuedeInscribirse(programacion) }
+    )
+  }
 }

@@ -70,6 +70,18 @@ class Estudiante {
   
   method puedeInscribirseEnMateria(materia) = materia.puedeInscribir(self)
   
+  method materiasEnQuePuedeInscribirse(materias) = materias.filter(
+    { materia => self.puedeInscribirseEnMateria(materia) }
+  )
+  
+  method materiasDelPlanEnQuePuedeInscribirse(carrera) {
+    if (not self.estaInscriptoEnCarrera(carrera)) self.error(
+        "Como mínimo, para poder inscribirse en alguna materia de la carrera, el estudiante debe estar inscripto en ella."
+      )
+    
+    return self.materiasEnQuePuedeInscribirse(carrera.planDeEstudios())
+  }
+  
   method inscribirEnMateria(materia) {
     materia.inscribir(self)
   }
