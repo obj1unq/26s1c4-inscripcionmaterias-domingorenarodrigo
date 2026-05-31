@@ -291,6 +291,29 @@ describe "Materias inscripto" {
     )
   }
   
+  test "Con una Materia con algún Estudiante en la lista de espera, un Estudiante inscripto cancela su inscripción a ella y el próximo Estudiante se inscribe en la Materia desde la lista de espera" {
+    // Configuración
+    const estudianteInscripto = new Estudiante()
+    estudianteInscripto.inscribirEnCarrera(programacion)
+    estudianteInscripto.inscribirEnMateria(objetos1)
+    
+    objetos1.cupo(1)
+    
+    const estudianteEnEspera = new Estudiante()
+    estudianteEnEspera.inscribirEnCarrera(programacion)
+    estudianteEnEspera.inscribirEnMateria(objetos1)
+    
+    // assert.that(estudianteInscripto.estaInscriptoEnMateria(objetos1))
+    // assert.that(estudianteEnEspera.estaEnListaDeEspera(objetos1))
+    // Ejercitación    
+    estudianteInscripto.cancelarMateria(objetos1)
+    
+    // Verificación
+    // assert.notThat(estudianteInscripto.estaInscriptoEnMateria(objetos1))
+    assert.that(estudianteEnEspera.estaInscriptoEnMateria(objetos1))
+    assert.notThat(estudianteEnEspera.estaEnListaDeEspera(objetos1))
+  }
+  
   test "El Estudiante indica si está inscripto en una Materia" {
     estudiante.inscribirEnCarrera(programacion)
     estudiante.inscribirEnMateria(objetos1)
