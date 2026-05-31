@@ -1,0 +1,39 @@
+import carrera.*
+import materia.*
+
+describe "Materias del plan de estudios" {
+  const _planDeEstudios = new Set()
+  const carrera = new Carrera(planDeEstudios = _planDeEstudios)
+  const objetos1 = new Materia()
+  
+  test "La Carrera describe las Materias de su plan de estudios" {
+    assert.equals(_planDeEstudios, carrera.planDeEstudios())
+  }
+  
+  test "La Carrera inicia de forma predeterminada sin Materias en su plan de estudios" {
+    const nuevaCarrera = new Carrera()
+    
+    assert.that(nuevaCarrera.planDeEstudios().isEmpty())
+  }
+  
+  test "Sin la Materia en su plan de estudios, la Carrera agrega la Materia a él" {
+    carrera.agregarAlPlan(objetos1)
+    
+    assert.that(carrera.planDeEstudios().contains(objetos1))
+  }
+  
+  test "Con la Materia en su plan de estudios, la Carrera agrega la Materia a él y hay error" {
+    carrera.agregarAlPlan(objetos1)
+    
+    assert.throwsExceptionWithMessage(
+      "La materia ya está contenida en el plan de estudios de la carrera",
+      { carrera.agregarAlPlan(objetos1) }
+    )
+  }
+  
+  test "La Carrera indica si una Materia está contenida en su plan de estudios" {
+    carrera.agregarAlPlan(objetos1)
+    
+    assert.that(carrera.contieneEnElPlan(objetos1))
+  }
+}
