@@ -1,0 +1,129 @@
+import materia.*
+import carrera.*
+import estudiante.*
+
+describe "Tests de la consigna" {
+  // Materias de Programacióm
+  const matematica1 = new Materia()
+  const basesDeDatos = new Materia()
+  const elementosDeProgramacion = new Materia()
+  const objetos1 = new Materia()
+  const objetos2 = new Materia(requisitos = #{objetos1, matematica1})
+  const objetos3 = new Materia(requisitos = #{objetos2, basesDeDatos})
+  const programacionConcurrente = new Materia(
+    requisitos = #{objetos1, basesDeDatos}
+  )
+  // Materias de Medicina
+  const biologia1 = new Materia()
+  const biologia2 = new Materia(requisitos = #{biologia1})
+  const quimica = new Materia()
+  // Carreras
+  const programacion = new Carrera(
+    planDeEstudios = #{
+      matematica1,
+      basesDeDatos,
+      objetos1,
+      objetos2,
+      objetos3,
+      programacionConcurrente,
+      elementosDeProgramacion
+    }
+  )
+  const medicina = new Carrera(
+    planDeEstudios = #{biologia1, biologia2, quimica}
+  )
+  // Estudiantes
+  const roque = new Estudiante(carrerasInscripto = #{programacion, medicina})
+  const luisa = new Estudiante(carrerasInscripto = #{programacion})
+  const romina = new Estudiante(carrerasInscripto = #{programacion})
+  const alicia = new Estudiante(carrerasInscripto = #{programacion})
+  const ana = new Estudiante(carrerasInscripto = #{programacion})
+  
+  method initialize() {
+    roque.registrarMateriaAprobada(elementosDeProgramacion, 7)
+    roque.registrarMateriaAprobada(matematica1, 7)
+    roque.registrarMateriaAprobada(objetos1, 7)
+    roque.registrarMateriaAprobada(basesDeDatos, 7)
+    roque.registrarMateriaAprobada(quimica, 7)
+    roque.registrarMateriaAprobada(biologia1, 7)
+    luisa.registrarMateriaAprobada(elementosDeProgramacion, 7)
+    luisa.registrarMateriaAprobada(objetos1, 7)
+    luisa.registrarMateriaAprobada(matematica1, 7)
+    romina.registrarMateriaAprobada(elementosDeProgramacion, 7)
+    romina.registrarMateriaAprobada(objetos1, 7)
+    romina.registrarMateriaAprobada(matematica1, 7)
+    alicia.registrarMateriaAprobada(elementosDeProgramacion, 7)
+    alicia.registrarMateriaAprobada(objetos1, 7)
+    alicia.registrarMateriaAprobada(matematica1, 7)
+    ana.registrarMateriaAprobada(elementosDeProgramacion, 7)
+    objetos2.cupo(3)
+  }
+  
+  test "Cumpliendo con las condiciones de inscripción, Roque indica que puede inscribirse en Objetos 2" {
+    // Condición: Roque está inscripto en la Carrera de Programación a la que pertenece Objetos 2, la cual no aprobó ni se encuentra inscripto ni en lista de espera en ella y la que tiene a Objetos 1 y Matemática 1 como requisitos para ser cursada que fueron aprobadas por él.
+    assert.that(roque.puedeInscribirseEnMateria(objetos2))
+  }
+  
+  test "Sin cumplir con las condiciones de inscripción, Roque indica que no puede inscribirse en Objetos 1" {
+    // Condición: Roque aprobó Objetos 1.
+    assert.notThat(roque.puedeInscribirseEnMateria(objetos1))
+  }
+  
+  test "Sin cumplir con las condiciones de inscripción, Roque indica que no puede inscribirse en Objetos 3" {
+    // Condición: Roque no aprobó el requisito de Objetos 2 que tiene Objetos 3 para ser cursada.
+    assert.notThat(roque.puedeInscribirseEnMateria(objetos3))
+  }
+  
+  test "Inscripto en Programación, Roque describe a Objetos 2 y Programación Concurrente como las Materias de su plan de estudios en las que puede inscribirse" {
+    assert.equals(
+      #{objetos2, programacionConcurrente},
+      roque.materiasDelPlanEnQuePuedeInscribirse(programacion)
+    )
+  }
+  
+  test "Inscripto en Medicina, Roque describe a Biología 2 como la Materia de su plan de estudios en la que puede inscribirse" {
+    assert.equals(
+      #{biologia2},
+      roque.materiasDelPlanEnQuePuedeInscribirse(medicina)
+    )
+  }
+  
+  test "Con Objetos 2 sin cupo disponible por las inscripciones previas de Luisa, Romina y Alicia y cumpliendo con las condiciones de inscripcion, Roque se inscribe en Objetos 2 y queda en su lista de espera" {
+    // Configuracion
+    luisa.inscribirEnMateria(objetos2)
+    romina.inscribirEnMateria(objetos2)
+    alicia.inscribirEnMateria(objetos2)
+    
+    // assert.that(luisa.estaInscriptoEnMateria(objetos2))
+    // assert.that(romina.estaInscriptoEnMateria(objetos2))
+    // assert.that(alicia.estaInscriptoEnMateria(objetos2))
+    // Ejercitación
+    // Condición: Roque está inscripto en la Carrera de Programación a la que pertenece Objetos 2, la cual no aprobó ni se encuentra inscripto ni en lista de espera en ella y la que no posee cupo y que además tiene a Objetos 1 y Matemática 1 como requisitos para ser cursada que fueron aprobadas por él.
+    roque.inscribirEnMateria(objetos2)
+    
+    // Verificación
+    // assert.notThat(roque.estaInscriptoEnMateria(objetos2))
+    assert.that(roque.estaEnListaDeEspera(objetos2))
+  }
+  
+  test "Con Objetos 2 con Roque únicamente en la lista de espera, Romina cancela su inscripción a ella y Roque se inscribe en Objetos 2 desde la lista de espera" {
+    // Configuracion
+    luisa.inscribirEnMateria(objetos2)
+    romina.inscribirEnMateria(objetos2)
+    alicia.inscribirEnMateria(objetos2)
+    roque.inscribirEnMateria(objetos2)
+    
+    // assert.that(luisa.estaInscriptoEnMateria(objetos2))
+    // assert.that(romina.estaInscriptoEnMateria(objetos2))
+    // assert.that(alicia.estaInscriptoEnMateria(objetos2))
+    // assert.notThat(roque.estaInscriptoEnMateria(objetos2))
+    // assert.that(roque.estaEnListaDeEspera(objetos2))
+    // Ejercitación    
+    romina.cancelarMateria(objetos2)
+    
+    // Verificación
+    // assert.notThat(romina.estaInscriptoEnMateria(objetos2))
+    assert.that(roque.estaInscriptoEnMateria(objetos2))
+    assert.notThat(roque.estaEnListaDeEspera(objetos2))
+  }
+}
